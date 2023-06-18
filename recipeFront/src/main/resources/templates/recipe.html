@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recipe</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+</head>
+<body>
+<h1>Book Recipe </h1>
+<h2>Recipe</h2>
+<form th:action="@{/recipe/getById}" method="post">
+    <input type="text" name="id" placeholder="Enter Recipe ID">
+    <button type="submit">Get Recipe by ID</button>
+</form>
+<br/>
+<a th:href="@{/recipe}"><button>Get all recipes</button></a>
+<br/>
+<br/>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Instructions</th>
+        <th>Ingredients</th>
+        <th>Preparation Time</th>
+        <th>Level of difficulty</th>
+    </tr>
+    <tr th:each="recipe : ${recipes}">
+        <td th:text="${recipe.getId()}"></td>
+        <td th:text="${recipe.getTitle()}"></td>
+        <td th:text="${recipe.getInstructions()}"></td>
+        <td th:text="${recipe.getIngredients()}"></td>
+        <td th:text="${recipe.getPreparationTime()}"></td>
+        <td th:text="${recipe.getDifficulty()}"></td>
+        <td>
+            <a th:href="@{/recipe/edit/{id}(id=${recipe.getId()})}"><button>Edit</button></a>
+        </td>
+        <td>
+            <form th:action="@{/recipe/delete/{id}(id=${recipe.getId})}" method="get">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+</table>
+<br/>
+<a href="/recipe/new"><button>New Recipe</button></a>
+<br/>
+<br/>
+</body>
+</html>
