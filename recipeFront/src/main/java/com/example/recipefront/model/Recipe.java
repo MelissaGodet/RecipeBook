@@ -1,4 +1,4 @@
-package com.example.recipefront;
+package com.example.recipefront.model;
 
 import java.util.List;
 import java.util.Objects;

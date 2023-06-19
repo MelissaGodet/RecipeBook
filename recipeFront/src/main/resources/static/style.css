@@ -51,6 +51,22 @@ table {
     margin-bottom: 20px;
 }
 
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+
+input[type="text"],
+input[type="password"] {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+    margin-bottom: 10px;
+}
+
 th,
 td {
     padding: 8px;

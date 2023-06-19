@@ -1,8 +1,8 @@
 package hr.algebra.aisi_project.model;
 
-import jakarta.persistence.*;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 
+import javax.persistence.*;
 import java.util.List;
 @Entity
 @Table(name="recipe")

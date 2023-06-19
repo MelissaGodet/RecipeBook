@@ -2,7 +2,6 @@ package hr.algebra.aisi_project.service;
 
 import hr.algebra.aisi_project.model.Recipe;
 import hr.algebra.aisi_project.repository.RecipeRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
