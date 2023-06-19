@@ -13,8 +13,7 @@
   <table>
     <tr>
       <td>Title:</td>
-      <td><input type="text" th:field="*{title}" size="50" required></td>
-    </tr>
+      <td><input type="text" th:field="*{title}" th:value="${title}" size="50" required></td>    </tr>
     <tr>
       <td>Instructions:</td>
       <td><input type="text" th:field="*{instructions}" size="50" required></td>
@@ -29,8 +28,7 @@
     </tr>
     <tr>
       <td>Preparation Time:</td>
-      <td><input type="text" th:field="*{preparationTime}" size="50" required></td>
-    </tr>
+      <td><input type="text" th:field="*{preparationTime}" th:value="${preparationTime}" size="50" required></td>    </tr>
     <tr>
       <td>Level of Difficulty:</td>
       <td>

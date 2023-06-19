@@ -125,3 +125,17 @@ td form {
     margin: 0;
 }
 
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input-wrapper:hover {
+    color: #4CAF50;
+}
+
+.file-input-wrapper input[type="file"] {
+    position: absolute;
+    left: -9999px;
+}
