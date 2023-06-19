@@ -1,7 +1,11 @@
-package com.example.recipefront;
+package com.example.recipefront.controller;
 
-import jakarta.annotation.Nullable;
+import com.example.recipefront.model.Difficulty;
+import com.example.recipefront.model.Ingredient;
+import com.example.recipefront.model.Recipe;
+import com.example.recipefront.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +16,9 @@ import java.util.List;
 @RequestMapping("recipe")
 public class RecipeController {
 
+    private final static String REDIRECT_RECIPEPAGE = "redirect:/recipe";
+    private final static String RECIPEPAGE = "recipe";
+
     @Autowired
     private RecipeService recipeService;
 
@@ -19,7 +26,7 @@ public class RecipeController {
     public String getAll(Model model) {
         List<Recipe> recipes = recipeService.getAll();
         model.addAttribute("recipes", recipes);
-        return "recipe";
+        return RECIPEPAGE;
     }
 
     @PostMapping("getById")
@@ -27,21 +34,21 @@ public class RecipeController {
         try {
             Long.valueOf(id);
         } catch(NumberFormatException nfe) {
-            return "redirect:/recipe";
+            return REDIRECT_RECIPEPAGE;
         }
-        return "redirect:/recipe/" + id;
+        return REDIRECT_RECIPEPAGE + "/" +id;
     }
 
     @GetMapping("{id}")
     public String getById(@PathVariable("id") Long id, Model model) {
         Recipe recipe = recipeService.getById(id);
         if(recipe==null) {
-            return "redirect:/recipe";
+            return REDIRECT_RECIPEPAGE;
         } else {
             List<Recipe> recipes = new ArrayList<>();
             recipes.add(recipe);
             model.addAttribute("recipes", recipes);
-            return "recipe";
+            return RECIPEPAGE;
         }
     }
 
@@ -64,7 +71,7 @@ public class RecipeController {
         recipe.setIngredients(ingredients);
         recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase().replaceAll("\\s", "_")));
         recipeService.create(recipe);
-        return "redirect:/recipe";
+        return REDIRECT_RECIPEPAGE;
     }
 
     @GetMapping("edit/{id}")
@@ -88,12 +95,12 @@ public class RecipeController {
         }
         recipe.setIngredients(ingredients);
         recipeService.update(recipe);
-        return "redirect:/recipe";
+        return REDIRECT_RECIPEPAGE;
     }
 
     @GetMapping("delete/{id}")
     public String deleteById(@PathVariable("id") Long id) {
         recipeService.deleteById(id);
-        return "redirect:/recipe";
+        return REDIRECT_RECIPEPAGE;
     }
 }

@@ -23,7 +23,7 @@
       <td>Ingredients:</td>
       <td>
         <select id="recipeIngredients" name="recipeIngredients" required multiple>
-          <option th:each="ingredient : ${T(com.example.recipefront.Ingredient).values()}" th:selected="${recipe.getIngredients() != null and recipe.getIngredients().contains(ingredient)}" th:value="${ingredient}" th:text="${ingredient}"></option>
+          <option th:each="ingredient : ${T(com.example.recipefront.model.Ingredient).values()}" th:selected="${recipe.getIngredients() != null and recipe.getIngredients().contains(ingredient)}" th:value="${ingredient}" th:text="${ingredient}"></option>
         </select>
       </td>
     </tr>
@@ -36,13 +36,13 @@
       <td>
         <select id="recipeLevelOfDifficulty" name="recipeLevelOfDifficulty" required>
           <option value="">Select type</option>
-          <option th:each="levelOfDifficulty : ${T(com.example.recipefront.Difficulty).values()}" th:selected="${levelOfDifficulty == recipe.difficulty}" th:value="${levelOfDifficulty}" th:text="${levelOfDifficulty}"></option>
+          <option th:each="levelOfDifficulty : ${T(com.example.recipefront.model.Difficulty).values()}" th:selected="${levelOfDifficulty == recipe.difficulty}" th:value="${levelOfDifficulty}" th:text="${levelOfDifficulty}"></option>
         </select>
       </td>
     </tr>
   </table>
   </br>
-  <input type="submit" value="Save">
+    <input type="submit" value="Save">
 </form>
 <br>
 <a th:href="@{/recipe}"><button>Cancel</button></a>

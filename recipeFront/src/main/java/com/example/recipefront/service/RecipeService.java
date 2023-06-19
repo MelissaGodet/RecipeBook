@@ -1,16 +1,15 @@
-package com.example.recipefront;
+package com.example.recipefront.service;
 
 
+import com.example.recipefront.model.Recipe;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class RecipeService {
@@ -20,8 +19,7 @@ public class RecipeService {
 
     public Recipe create(Recipe newRecipe) {
         HttpEntity<Recipe> request = new HttpEntity<>(newRecipe);
-        ResponseEntity<Recipe> response = REST_TEMPLATE.exchange(URL, HttpMethod.POST, request, Recipe.class);
-        return response.getBody();
+        return REST_TEMPLATE.exchange(URL, HttpMethod.POST, request, Recipe.class).getBody();
     }
 
     public Recipe getById(Long id) {

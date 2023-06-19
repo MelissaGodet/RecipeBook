@@ -1,4 +1,4 @@
-package com.example.recipefront;
+package com.example.recipefront.model;
 
 public enum Difficulty {
 
