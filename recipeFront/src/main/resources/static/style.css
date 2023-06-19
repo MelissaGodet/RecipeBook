@@ -35,6 +35,21 @@ input[type="text"] {
     width: 200px;
 }
 
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input-wrapper:hover {
+    color: #4CAF50;
+}
+
+.file-input-wrapper input[type="file"] {
+    position: absolute;
+    left: -9999px;
+}
+
 button {
     padding: 8px 16px;
     font-size: 16px;
@@ -108,4 +123,3 @@ td form {
     display: inline;
     margin: 0;
 }
-

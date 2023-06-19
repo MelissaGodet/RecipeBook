@@ -46,14 +46,30 @@
 <a href="/recipe/new"><button>New Recipe</button></a>
 <br/>
 <br/>
+
 <form th:action="@{/recipe/export}" method="get">
     <button type="submit">export</button>
 </form>
 <form th:action="@{/recipe/import}" method="post" enctype="multipart/form-data">
     <button type="submit">Import</button>
-    <input type="file" name="file" />
+    <label class="file-input-wrapper">
+        <span id="selected-file-name">Choose File</span>
+        <input type="file" name="file" id="file-upload" />
+    </label>
 </form>
-<br/>
-<br/>
+
+
+<script>
+    const fileUpload = document.querySelector('input[type="file"]');
+    const selectedFileName = document.getElementById('selected-file-name');
+
+    fileUpload.addEventListener('change', function() {
+        if (fileUpload.files.length > 0) {
+            selectedFileName.textContent = fileUpload.files[0].name;
+        } else {
+            selectedFileName.textContent = 'Choose File';
+        }
+    });
+</script>
 </body>
 </html>

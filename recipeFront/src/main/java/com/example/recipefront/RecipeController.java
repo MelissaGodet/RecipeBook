@@ -184,7 +184,7 @@ public class RecipeController {
             logger.info("Recipe \"" + recipe.getTitle() + "\" was successfully imported");
         }
 
-        return "redirect:/book";
+        return "redirect:/recipe";
     }
 
     public static String serializeRecipes(ArrayList<Recipe> recipes) {
