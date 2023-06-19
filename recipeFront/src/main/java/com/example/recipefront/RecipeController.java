@@ -4,19 +4,34 @@ import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.sql.SQLOutput;
+import java.util.*;
 
 @Controller
 @RequestMapping("recipe")
 public class RecipeController {
 
-    private static final String[] BLACK_LIST = {"DROP", "DELETE", "FROM", "SELECT", "TABLE", "DATABASE", "ALTER", "CREATE", "ADD", ";", "/", ">", "<"};
+    private static final String[] SQL_BLACK_LIST = {"DROP", "DELETE", "FROM", "SELECT", "TABLE", "DATABASE", "ALTER", "CREATE", "ADD", ";", "/", ">", "<"};
 
+    private static final Set<Class<?>> DESERIALIZE_WHITELIST = new HashSet<>(Collections.singletonList(Recipe.class));
+
+    private static final String FILE_PATH = "./serialized/";
 
     @Autowired
     private RecipeService recipeService;
@@ -128,12 +143,91 @@ public class RecipeController {
     }
 
     public static String stringValid(String input){
-        for (String blacklisted : BLACK_LIST) {
+        for (String blacklisted : SQL_BLACK_LIST) {
             if (input.toUpperCase().contains(blacklisted)) {
                 throw new IllegalArgumentException();
             }
         }
         return input;
     }
+
+    @GetMapping("export")
+    public ResponseEntity<Resource> export() {
+        String fileName = serializeRecipes(new ArrayList<>(recipeService.getAll()));
+        Resource resource = new FileSystemResource(fileName);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
+
+    @PostMapping("/import")
+    public String importBooks(@RequestParam("file") MultipartFile file) {
+        Logger logger = LoggerFactory.getLogger(RecipeController.class);
+        if (file.isEmpty()) {
+            logger.warn("Empty file");
+            return "redirect:/recipe";
+        }
+
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+        try {
+            Path path = Paths.get(fileName);
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        List<Recipe> recipes = deserializeRecipes(fileName);
+        for(Recipe recipe : recipes) {
+            recipe.setId(null);
+            recipeService.create(recipe);
+            logger.info("Recipe \"" + recipe.getTitle() + "\" was successfully imported");
+        }
+
+        return "redirect:/book";
+    }
+
+    public static String serializeRecipes(ArrayList<Recipe> recipes) {
+        String fileName = "recipes.ser";
+        try (FileOutputStream fileOut = new FileOutputStream(fileName);
+             ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+            out.writeObject(recipes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileName;
+    }
+
+    public static List<Recipe> deserializeRecipes(String fileName) {
+        List<Recipe> list = new ArrayList<>();
+
+        try (FileInputStream fileIn = new FileInputStream(fileName);
+             ObjectInputStream in = new ObjectInputStream(fileIn)) {
+
+            while (fileIn.available() > 0) {
+                ArrayList<?> arrayList = (ArrayList<?>) in.readObject();
+
+                for (Object element : arrayList) {
+                    Class<?> elementClass = element.getClass();
+
+                    if (DESERIALIZE_WHITELIST.contains(elementClass)) {
+                        list.add((Recipe) element);
+                    } else {
+                        throw new SecurityException("Object of non-deserializable class " + elementClass.getSimpleName() + " detected");
+                    }
+                }
+            }
+
+        } catch (SecurityException se) {
+            System.out.println("Only recipes can be deserialize");
+            se.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 
 }

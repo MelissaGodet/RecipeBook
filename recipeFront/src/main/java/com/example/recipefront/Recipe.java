@@ -1,9 +1,10 @@
 package com.example.recipefront;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class Recipe {
+public class Recipe implements Serializable {
 
     Long id;
 
