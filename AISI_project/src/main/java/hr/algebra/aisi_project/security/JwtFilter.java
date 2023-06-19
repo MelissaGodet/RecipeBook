@@ -65,12 +65,10 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean isEndpointAllowingUnauthenticatedAccess(HttpServletRequest request) {
-        return true;
-        /*
         String uri = request.getRequestURI();
         return SecurityConfiguration.UNAUTHENTICATED_ENDPOINTS
                 .stream()
-                .anyMatch(endpoint -> uri.contains(endpointWithoutWildcard(endpoint)));*/
+                .anyMatch(endpoint -> uri.contains(endpointWithoutWildcard(endpoint)));
     }
 
     private String endpointWithoutWildcard(String endpoint) {

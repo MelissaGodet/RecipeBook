@@ -2,8 +2,11 @@ package com.example.recipefront.controller;
 
 import com.example.recipefront.model.Difficulty;
 import com.example.recipefront.model.Ingredient;
+import com.example.recipefront.model.Jwt;
 import com.example.recipefront.model.Recipe;
 import com.example.recipefront.service.RecipeService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
@@ -23,8 +26,9 @@ public class RecipeController {
     private RecipeService recipeService;
 
     @GetMapping
-    public String getAll(Model model) {
-        List<Recipe> recipes = recipeService.getAll();
+    public String getAll(Model model, HttpSession session) {
+        String token = (String) session.getAttribute("Authorization");
+        List<Recipe> recipes = recipeService.getAll(token);
         model.addAttribute("recipes", recipes);
         return RECIPEPAGE;
     }
@@ -40,8 +44,9 @@ public class RecipeController {
     }
 
     @GetMapping("{id}")
-    public String getById(@PathVariable("id") Long id, Model model) {
-        Recipe recipe = recipeService.getById(id);
+    public String getById(Model model, HttpSession session, @PathVariable("id") Long id) {
+        String token = (String) session.getAttribute("Authorization");
+        Recipe recipe = recipeService.getById(id, token);
         if(recipe==null) {
             return REDIRECT_RECIPEPAGE;
         } else {
@@ -60,7 +65,8 @@ public class RecipeController {
     }
 
     @PostMapping("new")
-    public String create(@ModelAttribute("recipe") Recipe recipe,
+    public String create(HttpSession session,
+                         @ModelAttribute("recipe") Recipe recipe,
                          @RequestParam("recipeIngredients") List<String> recipeIngredients,
                          @RequestParam("recipeLevelOfDifficulty") String recipeLevelOfDifficulty)
     {
@@ -70,20 +76,23 @@ public class RecipeController {
         }
         recipe.setIngredients(ingredients);
         recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase().replaceAll("\\s", "_")));
-        recipeService.create(recipe);
+        String token = (String) session.getAttribute("Authorization");
+        recipeService.create(recipe, token);
         return REDIRECT_RECIPEPAGE;
     }
 
     @GetMapping("edit/{id}")
-    public String showUpdateForm(@PathVariable("id") Long id, Model model) {
-        Recipe recipe = recipeService.getById(id);
+    public String showUpdateForm(Model model, HttpSession session, @PathVariable("id") Long id) {
+        String token = (String) session.getAttribute("Authorization");
+        Recipe recipe = recipeService.getById(id, token);
         model.addAttribute("recipe", recipe);
         model.addAttribute("redirectionUrl","/recipe/edit/"+id);
         return "recipe2";
     }
 
     @PostMapping("edit/{id}")
-    public String update(@PathVariable("id") Long id,
+    public String update(HttpSession session,
+                         @PathVariable("id") Long id,
                          @ModelAttribute("recipe") Recipe recipe,
                          @RequestParam("recipeIngredients") List<String> recipeIngredients,
                          @RequestParam("recipeLevelOfDifficulty") String recipelevelOfDifficulty) {
@@ -94,13 +103,15 @@ public class RecipeController {
             ingredients.add(Ingredient.valueOf(ingredient.toUpperCase().replaceAll("\\s", "_")));
         }
         recipe.setIngredients(ingredients);
-        recipeService.update(recipe);
+        String token = (String) session.getAttribute("Authorization");
+        recipeService.update(recipe, token);
         return REDIRECT_RECIPEPAGE;
     }
 
     @GetMapping("delete/{id}")
-    public String deleteById(@PathVariable("id") Long id) {
-        recipeService.deleteById(id);
+    public String deleteById(HttpSession session, @PathVariable("id") Long id) {
+        String token = (String) session.getAttribute("Authorization");
+        recipeService.deleteById(id, token);
         return REDIRECT_RECIPEPAGE;
     }
 }
