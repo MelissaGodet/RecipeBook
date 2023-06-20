@@ -1,5 +1,7 @@
 package com.example.recipefront.controller;
 
+import com.example.recipefront.model.Authority;
+import com.example.recipefront.service.AuthorityService;
 import com.example.recipefront.model.Difficulty;
 import com.example.recipefront.model.Ingredient;
 import com.example.recipefront.model.Recipe;
@@ -45,42 +47,59 @@ public class RecipeController {
     @Autowired
     private RecipeService recipeService;
 
+    private AuthorityService authorityService = new AuthorityService();
+
     @GetMapping
     public String getAll(Model model, HttpSession session) {
-        String token = (String) session.getAttribute("Authorization");
-        List<Recipe> recipes = recipeService.getAll(token);
-        model.addAttribute("recipes", recipes);
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role) || authorityService.isAUser(role)) {
+            String token = (String) session.getAttribute("Authorization");
+            List<Recipe> recipes = recipeService.getAll(token);
+            model.addAttribute("recipes", recipes);
+        }
         return RECIPEPAGE;
     }
 
     @PostMapping("getById")
-    public String postGetById(@Nullable @RequestParam("id") String id) {
-        try {
-            Long.valueOf(id);
-        } catch(NumberFormatException nfe) {
-            return REDIRECT_RECIPEPAGE;
+    public String postGetById(HttpSession session, @Nullable @RequestParam("id") String id) {
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role) || authorityService.isAUser(role)) {
+            try {
+                Long.valueOf(id);
+            } catch (NumberFormatException nfe) {
+                return REDIRECT_RECIPEPAGE;
+            }
         }
-        return REDIRECT_RECIPEPAGE + "/" +id;
+        return REDIRECT_RECIPEPAGE + "/" + id;
+
     }
 
     @GetMapping("{id}")
     public String getById(Model model, HttpSession session, @PathVariable("id") Long id) {
-        String token = (String) session.getAttribute("Authorization");
-        Recipe recipe = recipeService.getById(id, token);
-        if(recipe==null) {
-            return REDIRECT_RECIPEPAGE;
-        } else {
-            List<Recipe> recipes = new ArrayList<>();
-            recipes.add(recipe);
-            model.addAttribute("recipes", recipes);
-            return RECIPEPAGE;
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role) || authorityService.isAUser(role)) {
+            String token = (String) session.getAttribute("Authorization");
+            Recipe recipe = recipeService.getById(id, token);
+            if (recipe == null) {
+                return REDIRECT_RECIPEPAGE;
+            } else {
+                List<Recipe> recipes = new ArrayList<>();
+                recipes.add(recipe);
+                model.addAttribute("recipes", recipes);
+            }
         }
+        return RECIPEPAGE;
     }
 
     @GetMapping("new")
-    public String showCreateForm(Model model) {
-        model.addAttribute("recipe", new Recipe());
-        return "recipe2";
+    public String showCreateForm(HttpSession session, Model model) {
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role)) {
+            model.addAttribute("recipe", new Recipe());
+            return "recipe2";
+        } else {
+            return REDIRECT_RECIPEPAGE;
+        }
     }
 
     @PostMapping("new")
@@ -92,34 +111,41 @@ public class RecipeController {
                          @RequestParam("recipeIngredients") List<String> recipeIngredients,
                          @RequestParam("recipeLevelOfDifficulty") String recipeLevelOfDifficulty)
     {
-        List<Ingredient> ingredients = new ArrayList<>();
-        for (String ingredient : recipeIngredients) {
-            ingredients.add(Ingredient.valueOf(ingredient.toUpperCase()));
-        }
-
-        try {
-            recipe.setTitle(stringValid(title));
-            recipe.setInstructions(stringValid(instructions));
-            recipe.setPreparationTime(preparationTime);
-            recipe.setPreparationTime(preparationTime);
-            recipe.setIngredients(ingredients);
-            recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase().replaceAll("\\s", "_")));
-            String token = (String) session.getAttribute("Authorization");
-            recipeService.update(recipe, token);
-        } catch (IllegalArgumentException e) {
-            Logger logger = LoggerFactory.getLogger(RecipeController.class);
-            logger.error("Error validating new recipe data", e);
-            return REDIRECT_RECIPEPAGE;
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role)) {
+            List<Ingredient> ingredients = new ArrayList<>();
+            for (String ingredient : recipeIngredients) {
+                ingredients.add(Ingredient.valueOf(ingredient.toUpperCase()));
+            }
+            try {
+                recipe.setTitle(stringValid(title));
+                recipe.setInstructions(stringValid(instructions));
+                recipe.setPreparationTime(preparationTime);
+                recipe.setPreparationTime(preparationTime);
+                recipe.setIngredients(ingredients);
+                recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase().replaceAll("\\s", "_")));
+                String token = (String) session.getAttribute("Authorization");
+                recipeService.update(recipe, token);
+            } catch (IllegalArgumentException e) {
+                Logger logger = LoggerFactory.getLogger(RecipeController.class);
+                logger.error("Error validating new recipe data", e);
+                return REDIRECT_RECIPEPAGE;
+            }
         }
         return REDIRECT_RECIPEPAGE;
     }
 
     @GetMapping("edit/{id}")
     public String showUpdateForm(Model model, HttpSession session, @PathVariable("id") Long id) {
-        String token = (String) session.getAttribute("Authorization");
-        Recipe recipe = recipeService.getById(id, token);
-        model.addAttribute("recipe", recipe);
-        return "recipe2";
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role)) {
+            String token = (String) session.getAttribute("Authorization");
+            Recipe recipe = recipeService.getById(id, token);
+            model.addAttribute("recipe", recipe);
+            return "recipe2";
+        } else {
+            return REDIRECT_RECIPEPAGE;
+        }
     }
 
     @PostMapping("edit/{id}")
@@ -131,32 +157,38 @@ public class RecipeController {
                          @RequestParam("preparationTime") Long preparationTime,
                          @RequestParam("recipeIngredients") List<String> recipeIngredients,
                          @RequestParam("recipeLevelOfDifficulty") String recipeLevelOfDifficulty) {
-        recipe.setId(id);
-        recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase()));
-        List<Ingredient> ingredients = new ArrayList<>();
-        for ( String ingredient : recipeIngredients){
-            ingredients.add(Ingredient.valueOf(ingredient.toUpperCase().replaceAll("\\s", "_")));
-        }
-        try {
-            recipe.setTitle(stringValid(title));
-            recipe.setInstructions(stringValid(instructions));
-            recipe.setPreparationTime(preparationTime);
-            recipe.setIngredients(ingredients);
-            recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase().replaceAll("\\s", "_")));
-            String token = (String) session.getAttribute("Authorization");
-            recipeService.update(recipe, token);
-        } catch (IllegalArgumentException e) {
-            Logger logger = LoggerFactory.getLogger(RecipeController.class);
-            logger.error("Error validating recipe update data", e);
-            return REDIRECT_RECIPEPAGE;
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role)) {
+            recipe.setId(id);
+            recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase()));
+            List<Ingredient> ingredients = new ArrayList<>();
+            for (String ingredient : recipeIngredients) {
+                ingredients.add(Ingredient.valueOf(ingredient.toUpperCase().replaceAll("\\s", "_")));
+            }
+            try {
+                recipe.setTitle(stringValid(title));
+                recipe.setInstructions(stringValid(instructions));
+                recipe.setPreparationTime(preparationTime);
+                recipe.setIngredients(ingredients);
+                recipe.setDifficulty(Difficulty.valueOf(recipeLevelOfDifficulty.toUpperCase().replaceAll("\\s", "_")));
+                String token = (String) session.getAttribute("Authorization");
+                recipeService.update(recipe, token);
+            } catch (IllegalArgumentException e) {
+                Logger logger = LoggerFactory.getLogger(RecipeController.class);
+                logger.error("Error validating recipe update data", e);
+                return REDIRECT_RECIPEPAGE;
+            }
         }
         return REDIRECT_RECIPEPAGE;
     }
 
     @GetMapping("delete/{id}")
     public String deleteById(HttpSession session, @PathVariable("id") Long id) {
-        String token = (String) session.getAttribute("Authorization");
-        recipeService.deleteById(id, token);
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role)) {
+            String token = (String) session.getAttribute("Authorization");
+            recipeService.deleteById(id, token);
+        }
         return REDIRECT_RECIPEPAGE;
     }
 
@@ -181,29 +213,31 @@ public class RecipeController {
 
     @PostMapping("/import")
     public String importBooks(HttpSession session, @RequestParam("file") MultipartFile file) {
-        String token = (String) session.getAttribute("Authorization");
-        Logger logger = LoggerFactory.getLogger(RecipeController.class);
-        if (file.isEmpty()) {
-            logger.warn("Empty file");
-            return REDIRECT_RECIPEPAGE;
+        Object role = session.getAttribute("Role");
+        if (authorityService.isAnAdmin(role)) {
+            String token = (String) session.getAttribute("Authorization");
+            Logger logger = LoggerFactory.getLogger(RecipeController.class);
+            if (file.isEmpty()) {
+                logger.warn("Empty file");
+                return REDIRECT_RECIPEPAGE;
+            }
+
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+            try {
+                Path path = Paths.get(fileName);
+                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            List<Recipe> recipes = deserializeRecipes(fileName);
+            for (Recipe recipe : recipes) {
+                recipe.setId(null);
+                recipeService.create(recipe, token);
+                logger.info("Recipe \"" + recipe.getTitle() + "\" was successfully imported");
+            }
         }
-
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
-        try {
-            Path path = Paths.get(fileName);
-            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<Recipe> recipes = deserializeRecipes(fileName);
-        for(Recipe recipe : recipes) {
-            recipe.setId(null);
-            recipeService.create(recipe, token);
-            logger.info("Recipe \"" + recipe.getTitle() + "\" was successfully imported");
-        }
-
         return REDIRECT_RECIPEPAGE;
     }
 
@@ -227,7 +261,6 @@ public class RecipeController {
 
             while (fileIn.available() > 0) {
                 ArrayList<?> arrayList = (ArrayList<?>) in.readObject();
-
                 for (Object element : arrayList) {
                     Class<?> elementClass = element.getClass();
 
@@ -245,7 +278,6 @@ public class RecipeController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return list;
     }
 }

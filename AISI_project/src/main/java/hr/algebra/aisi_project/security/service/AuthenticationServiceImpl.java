@@ -2,6 +2,7 @@ package hr.algebra.aisi_project.security.service;
 
 
 import hr.algebra.aisi_project.security.command.LoginCommand;
+import hr.algebra.aisi_project.security.domain.Authority;
 import hr.algebra.aisi_project.security.domain.User;
 import hr.algebra.aisi_project.security.dto.LoginDTO;
 import hr.algebra.aisi_project.security.repository.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -32,6 +34,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return Optional.of(
                 new LoginDTO(jwtService.createJwt(user.get()))
         );
+    }
+
+    @Override
+    public Set<Authority> loginAuthorities(LoginCommand command) {
+        Optional<User> user = userRepository.findByUsername(command.getUsername());
+
+        if (user.isEmpty() || !isMatchingPassword(command.getPassword(), user.get().getPassword())) {
+            return null;
+        }
+        return user.get().getAuthorities();
     }
 
     private boolean isMatchingPassword(String rawPassword, String encryptedPassword) {

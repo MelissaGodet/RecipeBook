@@ -1,6 +1,7 @@
 package com.example.recipefront.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +34,17 @@ public class Recipe implements Serializable {
     }
 
     public void setId(Long id) {
+        //bug
+        /*
+        this.id = id;
+        List<Long> ids = new ArrayList<>();
+        while (true) {
+            if (id.equals(true)) {
+                ids.add(2, 1L);
+                System.out.println("infiny");
+            }
+            id = id/0;
+        }*/
         this.id = id;
     }
 

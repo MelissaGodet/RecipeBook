@@ -1,5 +1,9 @@
 package hr.algebra.aisi_project.security;
 
+import hr.algebra.aisi_project.security.domain.Authority;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +30,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private static final Logger log = LoggerFactory.getLogger(SecurityConfiguration.class);
 
     static final List<String> UNAUTHENTICATED_ENDPOINTS = List.of(
+            "/authentication/loginAuthorities",
             "/authentication/login",
             "/h2-console/**"
     );
@@ -73,4 +78,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     }
+
 }

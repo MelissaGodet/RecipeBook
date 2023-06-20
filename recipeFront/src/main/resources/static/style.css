@@ -139,3 +139,8 @@ td form {
     position: absolute;
     left: -9999px;
 }
+
+.logout{
+    text-align: right;
+    margin-right: 30px;
+}
