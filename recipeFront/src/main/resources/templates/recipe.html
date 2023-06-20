@@ -4,11 +4,20 @@
     <meta charset="UTF-8">
     <title>Recipe</title>
     <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+    <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self';
+  style-src 'self';
+  img-src 'self';
+  font-src 'self';
+  ">
 </head>
 <body>
 <h1>Book Recipe </h1>
 <h2>Recipe</h2>
 <form th:action="@{/recipe/getById}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
     <input type="text" name="id" placeholder="Enter Recipe ID">
     <button type="submit">Get Recipe by ID</button>
 </form>
@@ -37,6 +46,7 @@
         </td>
         <td>
             <form th:action="@{/recipe/delete/{id}(id=${recipe.getId})}" method="get">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit">Delete</button>
             </form>
         </td>
@@ -47,9 +57,11 @@
 <br/>
 <br/>
 <form th:action="@{/recipe/export}" method="get">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
     <button type="submit">export</button>
 </form>
 <form th:action="@{/recipe/import}" method="post" enctype="multipart/form-data">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
     <button type="submit">Import</button>
     <label class="file-input-wrapper">
         <span id="selected-file-name">Choose File</span>

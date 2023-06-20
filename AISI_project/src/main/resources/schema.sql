@@ -1,6 +1,6 @@
 create table if not exists recipe (
     id identity,
-    title varchar(100) not null unique,
+    title varchar(100) not null,
     instructions varchar(500) not null,
     preparationTime int not null,
     difficulty varchar(100) not null,

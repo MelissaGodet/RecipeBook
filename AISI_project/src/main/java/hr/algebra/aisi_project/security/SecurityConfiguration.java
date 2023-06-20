@@ -1,6 +1,6 @@
 package hr.algebra.aisi_project.security;
 
-import hr.algebra.aisi_project.security.JwtFilter;
+import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -70,6 +71,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         // Add JWT token filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-    }
 
+    }
 }

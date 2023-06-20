@@ -4,13 +4,12 @@ import com.example.recipefront.model.Difficulty;
 import com.example.recipefront.model.Ingredient;
 import com.example.recipefront.model.Recipe;
 import com.example.recipefront.service.RecipeService;
-import jakarta.servlet.ServletOutputStream;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +33,14 @@ import java.util.*;
 @RequestMapping("recipe")
 public class RecipeController {
 
-    private static final String[] SQL_BLACK_LIST = {"DROP", "DELETE", "FROM", "SELECT", "TABLE", "DATABASE", "ALTER", "CREATE", "ADD", ";", "/", ">", "<"};
+    private static final String[] SQL_BLACK_LIST = {"DROP ", "DELETE ", "FROM ", "SELECT ", "TABLE ", "DATABASE ", "ALTER ", "CREATE ", ";", "/", ">", "<"};
 
     private static final Set<Class<?>> DESERIALIZE_WHITELIST = new HashSet<>(Collections.singletonList(Recipe.class));
 
     private static final String FILE_PATH = "./serialized/";
     private final static String REDIRECT_RECIPEPAGE = "redirect:/recipe";
     private final static String RECIPEPAGE = "recipe";
+
 
     @Autowired
     private RecipeService recipeService;
@@ -78,7 +78,7 @@ public class RecipeController {
     }
 
     @GetMapping("new")
-    public String showCreateForm(Model model, @PathVariable("id") Long id) {
+    public String showCreateForm(Model model) {
         model.addAttribute("recipe", new Recipe());
         return "recipe2";
     }
